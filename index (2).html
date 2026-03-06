@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sika – Smart Financial Decision Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-light:#E8C97A;--gold-pale:rgba(201,168,76,.13);--gold-border:rgba(201,168,76,.32);--green:#34C759;--yellow:#FFD60A;--red:#FF3B30;--blue:#4EA8DE;--blue-pale:rgba(78,168,222,.15);--purple:#AF52DE;--bg:#080810;--surface:rgba(255,255,255,.04);--surface-md:rgba(255,255,255,.06);--surface-hover:rgba(255,255,255,.08);--border:rgba(255,255,255,.08);--border-md:rgba(255,255,255,.12);--text-1:#F5F5F7;--text-2:rgba(245,245,247,.55);--text-3:rgba(245,245,247,.32);--r:20px;--rs:12px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-1);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 90% 60% at 15% 5%,rgba(201,168,76,.065) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 85% 85%,rgba(78,168,222,.055) 0%,transparent 55%)}
+.app{position:relative;z-index:2;max-width:430px;margin:0 auto;padding-bottom:110px;min-height:100vh}
+.nav{display:flex;align-items:flex-end;justify-content:space-between;padding:52px 22px 18px}
+.logo{font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-.4px;background:linear-gradient(130deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.logo-sub{font-size:11px;font-weight:400;letter-spacing:.6px;color:var(--text-3);margin-top:3px;font-family:'DM Sans',sans-serif;-webkit-text-fill-color:var(--text-3)}
+.pill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:7px 13px;font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .2s}
+.pill:hover{background:var(--surface-hover);color:var(--text-1)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tabs{display:flex;gap:3px;padding:0 22px 22px}
+.tab{flex:1;padding:8px 2px;text-align:center;font-size:11px;font-weight:500;border-radius:100px;border:1px solid transparent;cursor:pointer;transition:all .2s;color:var(--text-3)}
+.tab.active{background:var(--surface-md);border-color:var(--border);color:var(--text-1)}
+.screen{display:none}
+.screen.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.glass{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+/* HOME */
+.hero{padding:0 22px 26px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:34px;line-height:1.13;letter-spacing:-.6px;margin-bottom:9px}
+.hero h1 em{font-style:italic;background:linear-gradient(120deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;line-height:1.65;color:var(--text-2);font-weight:300}
+.grr-banner{margin:0 22px 18px;padding:14px 16px;border-radius:var(--rs);background:linear-gradient(135deg,rgba(52,199,89,.1),rgba(52,199,89,.04));border:1px solid rgba(52,199,89,.25);display:flex;gap:12px;align-items:center;cursor:pointer;transition:all .2s}
+.grr-banner:hover{background:linear-gradient(135deg,rgba(52,199,89,.15),rgba(52,199,89,.07))}
+.grr-banner-icon{font-size:22px;flex-shrink:0}
+.grr-banner-body{flex:1}
+.grr-banner-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--green);margin-bottom:2px}
+.grr-banner-title{font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:1px}
+.grr-banner-sub{font-size:12px;color:var(--text-2);line-height:1.45}
+.grr-banner-arrow{color:var(--green);font-size:18px;font-weight:300}
+.input-panel{margin:0 22px;padding:22px}
+.input-group{margin-bottom:15px}
+.input-label{font-size:10.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--text-3);display:block;margin-bottom:7px}
+.input-wrap{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;transition:border-color .2s}
+.input-wrap:focus-within{border-color:var(--gold-border);box-shadow:0 0 0 3px rgba(201,168,76,.07)}
+.currency-sel{background:rgba(201,168,76,.1);border:none;border-right:1px solid var(--border);color:var(--gold-light);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:11px 10px;cursor:pointer;outline:none;appearance:none;min-width:58px}
+.currency-sel option{background:#1a1a20;color:var(--text-1)}
+.f-input{flex:1;background:transparent;border:none;outline:none;color:var(--text-1);font-family:'DM Sans',sans-serif;font-size:16px;padding:11px 14px}
+.f-input::placeholder{color:var(--text-3);font-size:14px}
+.f-suffix{display:flex;align-items:center;padding:0 13px;color:var(--text-3);font-size:12px;font-weight:600}
+.toggle-row{display:flex;gap:7px;margin-bottom:14px}
+.t-btn{flex:1;padding:10px;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--rs);color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.t-btn.active{background:var(--gold-pale);border-color:var(--gold-border);color:var(--gold-light)}
+.cta{width:100%;background:linear-gradient(135deg,rgba(201,168,76,.22),rgba(232,201,122,.12));border:1px solid var(--gold-border);border-radius:var(--rs);color:var(--gold-light);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:15px;cursor:pointer;letter-spacing:.3px;transition:all .25s;margin-top:6px}
+.cta:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,168,76,.18)}
+/* OUTPUT */
+.gauge-panel{margin:0 22px 18px;padding:28px 22px 24px;text-align:center}
+.gauge-wrap{position:relative;width:196px;height:108px;margin:0 auto 18px}
+.gauge-svg{width:100%;height:100%;overflow:visible}
+.g-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:11;stroke-linecap:round}
+.g-fill{fill:none;stroke-width:11;stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.34,1.56,.64,1),stroke .4s}
+.gauge-score{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);text-align:center}
+.g-num{font-family:'DM Serif Display',serif;font-size:46px;line-height:1;letter-spacing:-2px}
+.g-lbl{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--text-3);margin-top:3px}
+.risk-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.6px;margin-bottom:10px}
+.risk-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.r-safe{background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);color:var(--green)}
+.r-caution{background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.25);color:var(--yellow)}
+.r-danger{background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.25);color:var(--red)}
+.g-desc{font-size:13px;line-height:1.6;color:var(--text-2);max-width:260px;margin:0 auto}
+.dti-panel{margin:0 22px 18px;padding:18px}
+.dti-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dti-title{font-size:13px;font-weight:500;color:var(--text-2)}
+.dti-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500}
+.bar-bg{height:8px;border-radius:100px;background:rgba(255,255,255,.07);position:relative}
+.bar-fill{height:100%;border-radius:100px;transition:width 1s cubic-bezier(.34,1.56,.64,1)}
+.dti-zones{display:flex;justify-content:space-between;margin-top:7px}
+.dti-zone{font-size:9.5px;color:var(--text-3)}
+.breakdown-panel{margin:0 22px 18px;padding:18px}
+.panel-title{font-size:11px;font-weight:700;color:var(--text-3);margin-bottom:14px;text-transform:uppercase;letter-spacing:.9px}
+.b-row{margin-bottom:13px}
+.b-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.b-name{font-weight:500}
+.b-amt{font-family:'JetBrains Mono',monospace;font-size:12px}
+.b-bg{height:9px;border-radius:100px;background:rgba(255,255,255,.06);overflow:hidden}
+.b-bar{height:100%;border-radius:100px;transition:width 1.1s cubic-bezier(.34,1.56,.64,1)}
+.bp{background:linear-gradient(90deg,#4EA8DE,#70C4F8)}
+.bi{background:linear-gradient(90deg,var(--gold),var(--gold-light))}
+.bm{background:linear-gradient(90deg,#AF52DE,#D080FF)}
+.totals{display:flex;gap:1px;background:var(--border);border-radius:var(--rs);overflow:hidden;margin-top:4px}
+.total-cell{flex:1;padding:12px;background:rgba(8,8,16,.95);text-align:center}
+.tc-lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:3px}
+.tc-val{font-family:'DM Serif Display',serif;font-size:17px;letter-spacing:-.4px}
+/* GRR PANEL */
+.grr-panel{margin:0 22px 18px;overflow:hidden}
+.grr-top{padding:18px 18px 14px;background:linear-gradient(135deg,rgba(52,199,89,.08),rgba(52,199,89,.02));border-bottom:1px solid rgba(52,199,89,.15);display:flex;align-items:flex-start;gap:12px}
+.grr-top-icon{font-size:22px;line-height:1}
+.grr-flag{font-size:9.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--green);margin-bottom:3px}
+.grr-headline{font-family:'DM Serif Display',serif;font-size:17px;letter-spacing:-.2px;margin-bottom:3px}
+.grr-sub{font-size:12px;color:var(--text-2);line-height:1.5}
+.grr-chart{padding:16px 18px 12px}
+.grr-chart-label{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--text-3);margin-bottom:12px}
+.rate-timeline{display:flex;align-items:flex-end;gap:5px;height:64px}
+.rt-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.rt-bar{width:100%;border-radius:3px 3px 0 0}
+.rt-lbl{font-size:8px;color:var(--text-3);white-space:nowrap}
+.rt-val{font-size:7.5px;font-family:'JetBrains Mono',monospace}
+.grr-options{padding:4px 18px 18px;display:flex;flex-direction:column;gap:9px}
+.grr-option{padding:13px 15px;border-radius:var(--rs);border:1px solid var(--border);background:rgba(255,255,255,.025);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
+.grr-option:hover{background:var(--surface-hover);border-color:var(--border-md)}
+.grr-option.rec{border-color:rgba(52,199,89,.3);background:rgba(52,199,89,.05)}
+.go-title{font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:2px}
+.go-desc{font-size:11.5px;color:var(--text-2);line-height:1.5}
+.go-saving{font-family:'DM Serif Display',serif;font-size:16px;color:var(--green);text-align:right;white-space:nowrap}
+.go-saving-lbl{font-size:9.5px;color:var(--text-3);text-align:right}
+.go-badge{font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.25);color:var(--green)}
+/* TIPS */
+.tips-panel{margin:0 22px 18px;padding:18px}
+.tips-hdr{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin-bottom:13px}
+.tip-card{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:9px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;transition:all .2s}
+.tip-card:hover{background:var(--surface-hover);border-color:var(--border-md)}
+.tip-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.t-gold{background:var(--gold-pale);border:1px solid var(--gold-border)}
+.t-blue{background:var(--blue-pale);border:1px solid rgba(78,168,222,.28)}
+.t-green{background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.22)}
+.tip-txt{font-size:12.5px;line-height:1.6;color:var(--text-2)}
+.tip-txt strong{color:var(--text-1);font-weight:600}
+/* SCENARIO */
+.scenario-panel{margin:0 22px 18px;padding:22px 20px}
+.scenario-h{font-family:'DM Serif Display',serif;font-size:21px;letter-spacing:-.3px;margin-bottom:4px}
+.scenario-sub{font-size:13px;color:var(--text-2);margin-bottom:20px}
+.slider-row{margin-bottom:22px}
+.slider-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.s-name{font-size:13px;font-weight:500;color:var(--text-2)}
+.s-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--gold-light);background:var(--gold-pale);padding:3px 9px;border-radius:7px;border:1px solid var(--gold-border)}
+.slider-track-wrap{position:relative;height:22px;display:flex;align-items:center}
+.slider-track-bg{position:absolute;left:0;right:0;height:4px;background:rgba(255,255,255,.1);border-radius:100px}
+.slider-track-fill{position:absolute;left:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:100px;pointer-events:none}
+.slider-thumb-wrap{position:absolute;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;z-index:2;pointer-events:none}
+.slider-thumb{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));box-shadow:0 2px 12px rgba(201,168,76,.55),0 0 0 3px rgba(201,168,76,.12)}
+input[type=range].hidden-range{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;z-index:3;height:22px;margin:0}
+/* LIVE PANEL */
+.live-panel{margin:0 22px 18px;padding:18px}
+.live-hdr{font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--text-3);margin-bottom:14px}
+.live-grid{display:flex;gap:14px;align-items:center}
+.mini-gauge-wrap{position:relative;width:74px;height:74px;flex-shrink:0}
+.mini-gauge-wrap svg{width:74px;height:74px}
+.mini-score{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:19px;letter-spacing:-.5px}
+.live-numbers{flex:1}
+.live-total{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:500;letter-spacing:-.5px}
+.live-sub{font-size:11.5px;color:var(--text-2);margin-top:2px}
+.live-monthly{display:flex;align-items:center;gap:6px;margin-top:7px}
+.live-monthly-lbl{font-size:12px;color:var(--text-2)}
+.live-monthly-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold-light)}
+/* COMPARE */
+.compare-panel{margin:0 22px 18px;overflow:hidden}
+.compare-hdr{padding:16px 18px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.compare-title{font-family:'DM Serif Display',serif;font-size:17px}
+.compare-badge{font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:4px 9px;border-radius:7px;background:var(--gold-pale);border:1px solid var(--gold-border);color:var(--gold)}
+.c-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.c-col{padding:14px;background:rgba(8,8,16,.95)}
+.c-col.highlight{background:rgba(52,199,89,.04)}
+.c-tag{font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:11px}
+.c-tag.cur{color:var(--gold)}
+.c-tag.better{color:var(--green)}
+.c-metric{margin-bottom:9px}
+.c-metric-lbl{font-size:10px;color:var(--text-3);margin-bottom:1px}
+.c-metric-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500}
+.c-saving{padding:10px 14px;background:rgba(52,199,89,.06);border-top:1px solid rgba(52,199,89,.15);display:flex;justify-content:space-between;align-items:center}
+.c-saving-lbl{font-size:11.5px;color:var(--text-2)}
+.c-saving-val{font-family:'DM Serif Display',serif;font-size:18px;color:var(--green)}
+/* SNAPSHOT */
+.snap-hero{padding:0 22px 18px}
+.snap-hero h2{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-.3px;margin-bottom:3px}
+.snap-hero p{font-size:13px;color:var(--text-2)}
+.snapshot-card{margin:0 22px;border-radius:24px;overflow:hidden;background:linear-gradient(145deg,#0D0D1A,#13131F);border:1px solid var(--gold-border);position:relative}
+.snapshot-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 15% 20%,rgba(201,168,76,.07) 0%,transparent 60%)}
+.snap-inner{position:relative;padding:28px 26px}
+.snap-logo{font-family:'DM Serif Display',serif;font-size:13px;background:linear-gradient(130deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:24px;letter-spacing:.3px}
+.snap-risk-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+.snap-risk-val{font-family:'DM Serif Display',serif;font-size:36px;letter-spacing:-1px;line-height:1;margin-bottom:22px}
+.snap-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.ss-lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:3px}
+.ss-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500}
+.snap-div{height:1px;background:var(--border);margin:0 -26px 18px}
+.snap-rec{font-size:12.5px;line-height:1.65;color:var(--text-2);padding:13px 14px;border-radius:var(--rs);margin-bottom:18px}
+.s-safe{background:rgba(52,199,89,.06);border:1px solid rgba(52,199,89,.15)}
+.s-caution{background:rgba(255,214,10,.06);border:1px solid rgba(255,214,10,.15)}
+.s-danger{background:rgba(255,59,48,.06);border:1px solid rgba(255,59,48,.15)}
+.snap-footer{display:flex;justify-content:space-between;align-items:center}
+.snap-date{font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace}
+.snap-brand{font-size:11px;color:var(--text-3)}
+.share-actions{margin:14px 22px 0;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.share-btn{padding:11px 14px;border-radius:var(--rs);border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.share-btn:hover{background:var(--surface-hover);color:var(--text-1)}
+.share-btn.gold{background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(232,201,122,.08));border-color:var(--gold-border);color:var(--gold-light);grid-column:1/-1}
+.share-btn.gold:hover{box-shadow:0 4px 20px rgba(201,168,76,.2)}
+/* DASHBOARD */
+.dash-hero{padding:0 22px 18px;display:flex;justify-content:space-between;align-items:flex-end}
+.dash-hero h2{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-.3px;margin-bottom:3px}
+.dash-hero p{font-size:13px;color:var(--text-2);font-weight:300}
+.live-tag{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green);background:rgba(52,199,89,.1);padding:5px 10px;border-radius:100px;border:1px solid rgba(52,199,89,.2)}
+.live-tag::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 22px;margin-bottom:15px}
+.stat-card{padding:16px 15px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)}
+.stat-card.wide{grid-column:1/-1}
+.sc-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:7px}
+.sc-val{font-family:'DM Serif Display',serif;font-size:30px;letter-spacing:-1px;line-height:1;margin-bottom:3px}
+.sc-sub{font-size:12px;color:var(--text-2)}
+.sc-delta{font-size:12px;font-weight:600;color:var(--green)}
+.mini-bars{display:flex;align-items:flex-end;gap:4px;height:38px;margin-top:13px}
+.mb{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--gold),var(--gold-pale));opacity:.7;animation:barUp .8s ease backwards}
+@keyframes barUp{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1)}}
+.blist{padding:0 14px}
+.blist-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
+.blist-item:last-child{border-bottom:none}
+.bl-left{display:flex;align-items:center;gap:10px}
+.bl-icon{width:34px;height:34px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px}
+.bl-name{font-size:13.5px;font-weight:500}
+.bl-sub{font-size:11.5px;color:var(--text-2)}
+.bl-val{font-family:'JetBrains Mono',monospace;font-size:14px}
+.grr-dash{margin:0 22px 15px;padding:18px}
+.risk-dist{padding:18px}
+.rd-grid{display:flex;gap:10px;margin-bottom:12px}
+.rd-cell{flex:1;padding:13px 10px;border-radius:var(--rs);text-align:center}
+.rd-num{font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-.5px}
+.rd-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-top:3px;color:var(--text-3)}
+.rd-note{font-size:12px;color:var(--text-2);line-height:1.6}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{width:100%;max-width:430px;background:linear-gradient(180deg,#101018,#0a0a10);border:1px solid var(--border);border-bottom:none;border-radius:28px 28px 0 0;padding:0 0 40px;animation:slideUp .3s cubic-bezier(.32,1.2,.6,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;border-radius:100px;background:rgba(255,255,255,.15);margin:12px auto 20px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-.3px;padding:0 24px 4px}
+.modal-sub{font-size:13px;color:var(--text-2);padding:0 24px 18px;line-height:1.55}
+.modal-options{padding:0 22px;display:flex;flex-direction:column;gap:10px}
+.modal-opt{padding:15px 16px;border-radius:var(--rs);border:1px solid var(--border);background:rgba(255,255,255,.025);cursor:pointer;transition:all .2s}
+.modal-opt:hover{background:var(--surface-hover);border-color:var(--border-md)}
+.modal-opt.rec{border-color:rgba(52,199,89,.3);background:rgba(52,199,89,.05)}
+.mo-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.mo-title{font-size:14px;font-weight:600}
+.mo-saving{font-family:'DM Serif Display',serif;font-size:16px;color:var(--green)}
+.mo-desc{font-size:12px;color:var(--text-2);line-height:1.55}
+.mo-rec-badge{font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.25);color:var(--green);margin-top:7px;display:inline-block}
+.modal-close-btn{display:block;width:calc(100% - 44px);margin:14px 22px 0;padding:13px;border-radius:var(--rs);background:var(--surface);border:1px solid var(--border);color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+.modal-close-btn:hover{background:var(--surface-hover)}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:430px;max-width:100%;padding:10px 20px 26px;background:linear-gradient(to top,rgba(8,8,16,.97) 70%,transparent);z-index:10}
+.bnav{display:flex;background:rgba(18,18,28,.92);border:1px solid var(--border);border-radius:100px;padding:5px;backdrop-filter:blur(24px)}
+.nb{flex:1;padding:8px 2px;border-radius:100px;border:none;background:transparent;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text-3);font-family:'DM Sans',sans-serif}
+.nb.active{background:rgba(255,255,255,.07);color:var(--gold-light)}
+.nb-ic{font-size:17px;line-height:1}
+.nb-lbl{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="grrModal" onclick="closeGRROverlay(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Rate Cut Opportunities</div>
+    <div class="modal-sub">Ghana Reference Rate is <strong style="color:var(--green)">11.71%</strong> — down 18 points since Jan 2025. Here's what you can do with your loan.</div>
+    <div class="modal-options" id="modalOptions"></div>
+    <button class="modal-close-btn" onclick="closeGRRBtn()">← Back to Calculator</button>
+  </div>
+</div>
+
+<div class="app">
+  <nav class="nav">
+    <div>
+      <div class="logo">Sika</div>
+      <div class="logo-sub">SMART LOAN ENGINE</div>
+    </div>
+    <div class="pill" onclick="switchNav('dashboard')"><span class="dot"></span>Admin</div>
+  </nav>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchNav('home')">Calculate</div>
+    <div class="tab" onclick="switchNav('output')">Results</div>
+    <div class="tab" onclick="switchNav('scenario')">What If?</div>
+    <div class="tab" onclick="switchNav('snapshot')">Share</div>
+  </div>
+
+  <!-- HOME -->
+  <section class="screen active" id="screen-home">
+    <div class="hero">
+      <h1>Should I Take<br><em>This Loan?</em></h1>
+      <p>Enter your details. Sika analyses affordability, risk, and true cost — instantly.</p>
+    </div>
+    <div class="grr-banner" onclick="openGRR()">
+      <div class="grr-banner-icon">📉</div>
+      <div class="grr-banner-body">
+        <div class="grr-banner-label">Rate Alert · March 2026</div>
+        <div class="grr-banner-title">Ghana Reference Rate hits 11.71% — record low</div>
+        <div class="grr-banner-sub">Down 18 points in 14 months. See how this affects your loan.</div>
+      </div>
+      <div class="grr-banner-arrow">›</div>
+    </div>
+    <div class="glass input-panel">
+      <div class="input-group">
+        <label class="input-label">Loan Amount</label>
+        <div class="input-wrap">
+          <select class="currency-sel" id="currency">
+            <option value="GH₵">GH₵</option><option value="$">$</option>
+            <option value="£">£</option><option value="€">€</option><option value="₦">₦</option>
+          </select>
+          <input class="f-input" type="number" id="loanAmount" placeholder="10,000" value="10000">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Interest Rate (per annum)</label>
+        <div class="input-wrap">
+          <input class="f-input" type="number" id="interestRate" placeholder="22" value="22" step="0.5">
+          <span class="f-suffix">% p.a.</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Repayment Period</label>
+        <div class="toggle-row">
+          <button class="t-btn active" onclick="setTermMode('months',this)">Months</button>
+          <button class="t-btn" onclick="setTermMode('years',this)">Years</button>
+        </div>
+        <div class="input-wrap">
+          <input class="f-input" type="number" id="loanTerm" placeholder="24" value="24">
+          <span class="f-suffix" id="termSuffix">mo</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Monthly Income</label>
+        <div class="input-wrap">
+          <input class="f-input" type="number" id="monthlyIncome" placeholder="3,000" value="3000">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Existing Monthly Debts <span style="color:var(--text-3);font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <div class="input-wrap">
+          <input class="f-input" type="number" id="existingDebts" placeholder="0" value="0">
+        </div>
+      </div>
+      <button class="cta" onclick="calculate()">Calculate My Loan →</button>
+    </div>
+  </section>
+
+  <!-- OUTPUT -->
+  <section class="screen" id="screen-output">
+    <div class="glass gauge-panel">
+      <div id="riskBadge" class="risk-badge r-safe">SAFE TO PROCEED</div>
+      <div style="height:10px"></div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 196 108">
+          <defs>
+            <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#34C759"/>
+              <stop offset="50%" stop-color="#FFD60A"/>
+              <stop offset="100%" stop-color="#FF3B30"/>
+            </linearGradient>
+          </defs>
+          <path class="g-track" d="M18 98 A 80 80 0 0 1 178 98"/>
+          <path class="g-fill" id="gaugeFill" d="M18 98 A 80 80 0 0 1 178 98" stroke="url(#gGrad)" stroke-dasharray="251" stroke-dashoffset="251"/>
+        </svg>
+        <div class="gauge-score">
+          <div class="g-num" id="gaugeNum" style="color:var(--green)">—</div>
+          <div class="g-lbl">Affordability</div>
+        </div>
+      </div>
+      <p class="g-desc" id="gaugeDesc">Enter your details on the Home tab to see your score.</p>
+    </div>
+    <div class="glass dti-panel">
+      <div class="dti-head">
+        <span class="dti-title">Debt-to-Income Ratio</span>
+        <span class="dti-val" id="dtiVal" style="color:var(--green)">—</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="dtiFill" style="width:0%;background:linear-gradient(90deg,#34C759,#4ADE80)"></div></div>
+      <div class="dti-zones">
+        <span class="dti-zone">0%</span>
+        <span class="dti-zone" style="color:var(--green)">Safe &lt;36%</span>
+        <span class="dti-zone" style="color:var(--yellow)">Caution &lt;50%</span>
+        <span class="dti-zone" style="color:var(--red)">High &gt;50%</span>
+      </div>
+    </div>
+    <div class="glass breakdown-panel">
+      <div class="panel-title">Loan Breakdown</div>
+      <div class="b-row">
+        <div class="b-lbl"><span class="b-name" style="color:#4EA8DE">Principal</span><span class="b-amt" style="color:#4EA8DE" id="principalAmt">—</span></div>
+        <div class="b-bg"><div class="b-bar bp" id="principalBar" style="width:0%"></div></div>
+      </div>
+      <div class="b-row">
+        <div class="b-lbl"><span class="b-name" style="color:var(--gold-light)">Total Interest</span><span class="b-amt" style="color:var(--gold-light)" id="interestAmt">—</span></div>
+        <div class="b-bg"><div class="b-bar bi" id="interestBar" style="width:0%"></div></div>
+      </div>
+      <div class="b-row" style="margin-bottom:14px">
+        <div class="b-lbl"><span class="b-name" style="color:#AF52DE">Monthly Payment</span><span class="b-amt" style="color:#AF52DE" id="monthlyAmt">—</span></div>
+        <div class="b-bg"><div class="b-bar bm" id="monthlyBar" style="width:0%"></div></div>
+      </div>
+      <div class="totals">
+        <div class="total-cell"><div class="tc-lbl">Total Repayment</div><div class="tc-val" id="totalRepayment">—</div></div>
+        <div class="total-cell"><div class="tc-lbl">Interest Cost</div><div class="tc-val" style="color:var(--gold-light)" id="totalInterest">—</div></div>
+      </div>
+    </div>
+    <div class="glass grr-panel">
+      <div class="grr-top">
+        <div class="grr-top-icon">📉</div>
+        <div>
+          <div class="grr-flag">Live Rate Intelligence</div>
+          <div class="grr-headline">GRR is at a record low: 11.71%</div>
+          <div class="grr-sub">Down from 29.72% in Jan 2025. Commercial rates typically follow 6–10 months later — your window of opportunity.</div>
+        </div>
+      </div>
+      <div class="grr-chart">
+        <div class="grr-chart-label">Ghana Reference Rate — 14-month decline</div>
+        <div class="rate-timeline" id="grrTimeline"></div>
+      </div>
+      <div style="padding:4px 18px 10px;font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--text-3)">What this means for you</div>
+      <div class="grr-options">
+        <div class="grr-option rec" onclick="openGRR()">
+          <div style="flex:1"><div class="go-title">Refinance at a lower rate</div><div class="go-desc">Ask your bank to pass on the GRR drop and save on interest.</div></div>
+          <div style="margin-left:12px;text-align:right"><div class="go-saving" id="grrSaving1">—</div><div class="go-saving-lbl">total saving</div></div>
+        </div>
+        <div class="grr-option" onclick="openGRR()">
+          <div style="flex:1"><div class="go-title">Reduce monthly payment</div><div class="go-desc">Keep your term, lower the rate, free up monthly cash.</div></div>
+          <div style="margin-left:12px;text-align:right"><div class="go-saving" id="grrSaving2">—</div><div class="go-saving-lbl">per month</div></div>
+        </div>
+        <div class="grr-option" onclick="openGRR()">
+          <div style="flex:1"><div class="go-title">Top up your loan now</div><div class="go-desc">Access more credit at today's lower rates before they rise again.</div></div>
+          <div style="margin-left:12px"><div class="go-badge">Explore →</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="glass tips-panel">
+      <div class="tips-hdr">✦ Smart Tips</div>
+      <div class="tip-card"><div class="tip-ico t-gold">💡</div><div class="tip-txt"><strong>Lower rate by 2%</strong> would save you <strong id="savingsTip">—</strong> in total interest.</div></div>
+      <div class="tip-card"><div class="tip-ico t-blue">⏱</div><div class="tip-txt"><strong>Shortening the term by 6 months</strong> raises monthly payments slightly but meaningfully cuts total interest.</div></div>
+      <div class="tip-card"><div class="tip-ico t-green">✓</div><div class="tip-txt" id="safetyTip">Calculate your loan to see a personalised affordability tip here.</div></div>
+    </div>
+  </section>
+
+  <!-- SCENARIO -->
+  <section class="screen" id="screen-scenario">
+    <div class="glass scenario-panel">
+      <div class="scenario-h">Scenario Mode</div>
+      <div class="scenario-sub">Drag sliders — results update live</div>
+      <div class="slider-row">
+        <div class="slider-meta"><span class="s-name">Loan Amount</span><span class="s-val" id="sLoanAmt">GH₵ 10,000</span></div>
+        <div class="slider-track-wrap">
+          <div class="slider-track-bg"></div>
+          <div class="slider-track-fill" id="sLoanFill" style="width:9%"></div>
+          <div class="slider-thumb-wrap" id="sLoanThumb" style="left:9%"><div class="slider-thumb"></div></div>
+          <input type="range" class="hidden-range" id="sLoanSlider" min="1000" max="100000" step="500" value="10000" oninput="updateScenario()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-meta"><span class="s-name">Interest Rate</span><span class="s-val" id="sRate">22%</span></div>
+        <div class="slider-track-wrap">
+          <div class="slider-track-bg"></div>
+          <div class="slider-track-fill" id="sRateFill" style="width:48%"></div>
+          <div class="slider-thumb-wrap" id="sRateThumb" style="left:48%"><div class="slider-thumb"></div></div>
+          <input type="range" class="hidden-range" id="sRateSlider" min="1" max="45" step="0.5" value="22" oninput="updateScenario()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-meta"><span class="s-name">Repayment (months)</span><span class="s-val" id="sTerm">24 mo</span></div>
+        <div class="slider-track-wrap">
+          <div class="slider-track-bg"></div>
+          <div class="slider-track-fill" id="sTermFill" style="width:26%"></div>
+          <div class="slider-thumb-wrap" id="sTermThumb" style="left:26%"><div class="slider-thumb"></div></div>
+          <input type="range" class="hidden-range" id="sTermSlider" min="3" max="84" step="3" value="24" oninput="updateScenario()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-meta"><span class="s-name">Monthly Income</span><span class="s-val" id="sIncome">GH₵ 3,000</span></div>
+        <div class="slider-track-wrap">
+          <div class="slider-track-bg"></div>
+          <div class="slider-track-fill" id="sIncomeFill" style="width:9%"></div>
+          <div class="slider-thumb-wrap" id="sIncomeThumb" style="left:9%"><div class="slider-thumb"></div></div>
+          <input type="range" class="hidden-range" id="sIncomeSlider" min="500" max="30000" step="100" value="3000" oninput="updateScenario()">
+        </div>
+      </div>
+    </div>
+    <div class="glass live-panel">
+      <div class="live-hdr">Live Result</div>
+      <div class="live-grid">
+        <div class="mini-gauge-wrap">
+          <svg viewBox="0 0 74 74">
+            <circle cx="37" cy="37" r="28" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/>
+            <circle cx="37" cy="37" r="28" fill="none" stroke="var(--green)" stroke-width="8" stroke-linecap="round" stroke-dasharray="176" id="miniGauge" stroke-dashoffset="52" transform="rotate(-90 37 37)" style="transition:stroke-dashoffset .8s,stroke .4s"/>
+          </svg>
+          <div class="mini-score" id="miniScore" style="color:var(--green)">72</div>
+        </div>
+        <div class="live-numbers">
+          <div class="live-total" id="sTotalRepay">GH₵ —</div>
+          <div class="live-sub">Total repayment</div>
+          <div class="live-monthly"><span class="live-monthly-lbl">Monthly:</span><span class="live-monthly-val" id="sMonthly">—</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11.5px;color:var(--text-2)">DTI Ratio</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px" id="sDTI">—</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="sDTIFill" style="width:0%;background:linear-gradient(90deg,#34C759,#4ADE80)"></div></div>
+      </div>
+    </div>
+    <div class="glass compare-panel">
+      <div class="compare-hdr"><div class="compare-title">Compare Loans</div><div class="compare-badge">What If?</div></div>
+      <div class="c-grid">
+        <div class="c-col">
+          <div class="c-tag cur">Current</div>
+          <div class="c-metric"><div class="c-metric-lbl">Loan</div><div class="c-metric-val" id="cLoan">—</div></div>
+          <div class="c-metric"><div class="c-metric-lbl">Rate</div><div class="c-metric-val" id="cRate">—</div></div>
+          <div class="c-metric"><div class="c-metric-lbl">Total Cost</div><div class="c-metric-val" id="cTotal" style="color:var(--gold-light)">—</div></div>
+          <div class="c-metric"><div class="c-metric-lbl">Monthly</div><div class="c-metric-val" id="cMonthly">—</div></div>
+        </div>
+        <div class="c-col highlight">
+          <div class="c-tag better">GRR Rate</div>
+          <div class="c-metric"><div class="c-metric-lbl">Loan</div><div class="c-metric-val" id="altLoan">—</div></div>
+          <div class="c-metric"><div class="c-metric-lbl">Rate</div><div class="c-metric-val" id="altRate" style="color:var(--green)">—</div></div>
+          <div class="c-metric"><div class="c-metric-lbl">Total Cost</div><div class="c-metric-val" id="altTotal" style="color:var(--green)">—</div></div>
+          <div class="c-metric"><div class="c-metric-lbl">Monthly</div><div class="c-metric-val" id="altMonthly">—</div></div>
+        </div>
+      </div>
+      <div class="c-saving"><span class="c-saving-lbl">You could save</span><span class="c-saving-val" id="cSaving">—</span></div>
+    </div>
+  </section>
+
+  <!-- SNAPSHOT -->
+  <section class="screen" id="screen-snapshot">
+    <div class="snap-hero"><h2>Share Summary</h2><p>Your shareable loan analysis, ready to send</p></div>
+    <div class="snapshot-card">
+      <div class="snap-inner">
+        <div class="snap-logo">Sika · Smart Financial Engine</div>
+        <div class="snap-risk-label">Loan Risk Assessment</div>
+        <div class="snap-risk-val r-danger" id="snapRisk">HIGH RISK</div>
+        <div class="snap-stats">
+          <div><div class="ss-lbl">Loan Amount</div><div class="ss-val" id="snapLoan">—</div></div>
+          <div><div class="ss-lbl">Rate p.a.</div><div class="ss-val" id="snapRate">—</div></div>
+          <div><div class="ss-lbl">Total Repayment</div><div class="ss-val" id="snapTotal">—</div></div>
+          <div><div class="ss-lbl">Interest Paid</div><div class="ss-val" style="color:var(--gold-light)" id="snapInterest">—</div></div>
+          <div><div class="ss-lbl">Monthly Payment</div><div class="ss-val" id="snapMonthly">—</div></div>
+          <div><div class="ss-lbl">DTI Ratio</div><div class="ss-val" id="snapDTI">—</div></div>
+        </div>
+        <div class="snap-div"></div>
+        <div class="snap-rec s-danger" id="snapRec">Calculate your loan first to generate a personalised snapshot.</div>
+        <div class="snap-footer"><span class="snap-date" id="snapDate">Mar 2026</span><span class="snap-brand">sika.finance</span></div>
+      </div>
+    </div>
+    <div class="share-actions">
+      <button class="share-btn gold" onclick="copySnapshot()">⬡ Copy Snapshot</button>
+      <button class="share-btn" onclick="shareWA()">📱 WhatsApp</button>
+      <button class="share-btn" onclick="shareTelegram()">✈ Telegram</button>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="screen" id="screen-dashboard">
+    <div class="dash-hero">
+      <div><h2>Admin Metrics</h2><p>Real-time usage intelligence</p></div>
+      <div class="live-tag">Live</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sc-lbl">Total Users</div><div class="sc-val" style="color:var(--gold-light)">14,832</div><div class="sc-delta">↑ 12% this week</div></div>
+      <div class="stat-card"><div class="sc-lbl">Calculations</div><div class="sc-val">61,204</div><div class="sc-sub">All time</div></div>
+      <div class="stat-card wide">
+        <div class="sc-lbl">Daily Calculations — Last 7 Days</div>
+        <div class="sc-val" style="font-size:22px">4,218 <span style="font-size:13px;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text-2)">today</span></div>
+        <div class="mini-bars">
+          <div class="mb" style="height:55%;animation-delay:.0s"></div><div class="mb" style="height:65%;animation-delay:.05s"></div>
+          <div class="mb" style="height:45%;animation-delay:.1s"></div><div class="mb" style="height:80%;animation-delay:.15s"></div>
+          <div class="mb" style="height:70%;animation-delay:.2s"></div><div class="mb" style="height:90%;animation-delay:.25s"></div>
+          <div class="mb" style="height:100%;background:linear-gradient(180deg,var(--gold-light),var(--gold));animation-delay:.3s"></div>
+        </div>
+      </div>
+    </div>
+    <div class="glass grr-dash" style="margin:0 22px 15px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:6px">Ghana Reference Rate</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:30px;letter-spacing:-1px;color:var(--green)">11.71%</div>
+          <div style="font-size:12px;color:var(--green);margin-top:2px">↓ 18.01 pts since Jan 2025</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">Record Low · Mar 2026</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:8px">Users alerted</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--gold-light)">8,214</div>
+        </div>
+      </div>
+      <div id="grrHistBars" style="display:flex;gap:3px;align-items:flex-end;height:48px"></div>
+    </div>
+    <div class="glass blist" style="margin:0 22px 15px">
+      <div class="blist-item"><div class="bl-left"><div class="bl-icon">🇬🇭</div><div><div class="bl-name">Ghanaian Cedi (GH₵)</div><div class="bl-sub">West Africa</div></div></div><div class="bl-val" style="color:var(--gold-light)">64%</div></div>
+      <div class="blist-item"><div class="bl-left"><div class="bl-icon">🇬🇧</div><div><div class="bl-name">British Pound (£)</div><div class="bl-sub">UK Diaspora</div></div></div><div class="bl-val">18%</div></div>
+      <div class="blist-item"><div class="bl-left"><div class="bl-icon">🇺🇸</div><div><div class="bl-name">US Dollar ($)</div><div class="bl-sub">Americas</div></div></div><div class="bl-val">11%</div></div>
+      <div class="blist-item"><div class="bl-left"><div class="bl-icon">🇳🇬</div><div><div class="bl-name">Nigerian Naira (₦)</div><div class="bl-sub">West Africa</div></div></div><div class="bl-val">7%</div></div>
+    </div>
+    <div class="glass risk-dist" style="margin:0 22px 15px">
+      <div class="rd-grid">
+        <div class="rd-cell" style="background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.18)"><div class="rd-num" style="color:var(--green)">52%</div><div class="rd-lbl">Safe</div></div>
+        <div class="rd-cell" style="background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.18)"><div class="rd-num" style="color:var(--yellow)">31%</div><div class="rd-lbl">Caution</div></div>
+        <div class="rd-cell" style="background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.18)"><div class="rd-num" style="color:var(--red)">17%</div><div class="rd-lbl">High</div></div>
+      </div>
+      <div class="rd-note">17% of users are in the high-risk band — a key target for Sika's AI nudges and embedded financial education.</div>
+    </div>
+  </section>
+</div>
+
+<div class="bottom-nav">
+  <div class="bnav">
+    <button class="nb active" id="nav-home" onclick="switchNav('home')"><span class="nb-ic">⌂</span><span class="nb-lbl">Home</span></button>
+    <button class="nb" id="nav-output" onclick="switchNav('output')"><span class="nb-ic">◎</span><span class="nb-lbl">Results</span></button>
+    <button class="nb" id="nav-scenario" onclick="switchNav('scenario')"><span class="nb-ic">⊞</span><span class="nb-lbl">What If?</span></button>
+    <button class="nb" id="nav-snapshot" onclick="switchNav('snapshot')"><span class="nb-ic">◈</span><span class="nb-lbl">Share</span></button>
+    <button class="nb" id="nav-dashboard" onclick="switchNav('dashboard')"><span class="nb-ic">⊟</span><span class="nb-lbl">Admin</span></button>
+  </div>
+</div>
+
+<script>
+const S={amount:10000,rate:22,term:24,income:3000,debts:0,currency:'GH₵',termMode:'months'};
+const GRR=[{mo:'Jan 25',v:29.72},{mo:'Mar 25',v:25.1},{mo:'May 25',v:23.99},{mo:'Jul 25',v:21.5},{mo:'Sep 25',v:19.67},{mo:'Nov 25',v:17.96},{mo:'Jan 26',v:15.68},{mo:'Feb 26',v:14.58},{mo:'Mar 26',v:11.71}];
+
+function calc(amount,rate,term,income,debts){
+  const r=(rate/100)/12;
+  const m=r===0?amount/term:amount*(r*Math.pow(1+r,term))/(Math.pow(1+r,term)-1);
+  const total=m*term,interest=total-amount,dti=((m+debts)/income)*100;
+  let score=100-(dti*1.5);if(rate>25)score-=15;if(term>60)score-=10;
+  return{m,total,interest,dti,score:Math.max(5,Math.min(100,Math.round(score)))};
+}
+function rsk(s){
+  if(s>=60)return{label:'SAFE TO PROCEED',cls:'r-safe',color:'#34C759'};
+  if(s>=35)return{label:'PROCEED WITH CAUTION',cls:'r-caution',color:'#FFD60A'};
+  return{label:'HIGH RISK',cls:'r-danger',color:'#FF3B30'};
+}
+function fmt(v,c){return c+' '+Math.round(v).toLocaleString();}
+
+function switchNav(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  const idx=['home','output','scenario','snapshot'].indexOf(n);
+  if(idx>-1)document.querySelectorAll('.tab')[idx]?.classList.add('active');
+  document.getElementById('nav-'+n)?.classList.add('active');
+}
+
+function setTermMode(mode,btn){
+  document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');S.termMode=mode;
+  document.getElementById('termSuffix').textContent=mode==='months'?'mo':'yr';
+}
+
+function calculate(){
+  S.amount=parseFloat(document.getElementById('loanAmount').value)||10000;
+  S.rate=parseFloat(document.getElementById('interestRate').value)||22;
+  S.income=parseFloat(document.getElementById('monthlyIncome').value)||3000;
+  S.debts=parseFloat(document.getElementById('existingDebts').value)||0;
+  S.currency=document.getElementById('currency').value;
+  let raw=parseFloat(document.getElementById('loanTerm').value)||24;
+  S.term=S.termMode==='years'?raw*12:raw;
+  updateOutput();updateSnapshot();syncSliders();switchNav('output');
+}
+
+function updateOutput(){
+  const c=S.currency,res=calc(S.amount,S.rate,S.term,S.income,S.debts),r=rsk(res.score);
+  document.getElementById('gaugeFill').style.strokeDashoffset=251-(res.score/100)*251;
+  document.getElementById('gaugeNum').textContent=res.score;
+  document.getElementById('gaugeNum').style.color=r.color;
+  const bd=document.getElementById('riskBadge');bd.textContent=r.label;bd.className='risk-badge '+r.cls;
+  const descs={safe:'Monthly payment is '+Math.round((res.m/S.income)*100)+'% of income — within safe limits.',caution:'Monthly payment is '+Math.round((res.m/S.income)*100)+'% of income — approaching the limit.',danger:'Monthly payment is '+Math.round((res.m/S.income)*100)+'% of income — exceeds safe thresholds.'};
+  document.getElementById('gaugeDesc').textContent=descs[r.cls==='r-safe'?'safe':r.cls==='r-caution'?'caution':'danger'];
+  const dp=Math.min(res.dti,100),dc=res.dti<36?'linear-gradient(90deg,#34C759,#4ADE80)':res.dti<50?'linear-gradient(90deg,#FFD60A,#FFE55A)':'linear-gradient(90deg,#FF3B30,#FF6B63)';
+  document.getElementById('dtiVal').textContent=Math.round(res.dti)+'%';
+  document.getElementById('dtiVal').style.color=res.dti<36?'var(--green)':res.dti<50?'var(--yellow)':'var(--red)';
+  document.getElementById('dtiFill').style.width=dp+'%';document.getElementById('dtiFill').style.background=dc;
+  const mx=Math.max(res.total,S.amount,res.interest,res.m*4);
+  document.getElementById('principalBar').style.width=(S.amount/mx*85)+'%';
+  document.getElementById('interestBar').style.width=(res.interest/mx*85)+'%';
+  document.getElementById('monthlyBar').style.width=Math.min(res.m*3/mx*85,82)+'%';
+  document.getElementById('principalAmt').textContent=fmt(S.amount,c);
+  document.getElementById('interestAmt').textContent=fmt(res.interest,c);
+  document.getElementById('monthlyAmt').textContent=fmt(res.m,c);
+  document.getElementById('totalRepayment').textContent=fmt(res.total,c);
+  document.getElementById('totalInterest').textContent=fmt(res.interest,c);
+  const alt=calc(S.amount,Math.max(S.rate-2,1),S.term,S.income,S.debts);
+  document.getElementById('grrSaving1').textContent=fmt(res.interest-alt.interest,c);
+  document.getElementById('grrSaving2').textContent=fmt(res.m-alt.m,c)+'/mo';
+  document.getElementById('savingsTip').textContent=fmt(res.interest-alt.interest,c);
+  const st=document.getElementById('safetyTip');
+  if(r.cls==='r-safe')st.innerHTML='Your DTI is within the <strong>safe threshold</strong>. This loan is manageable on your current income.';
+  else if(r.cls==='r-caution')st.innerHTML='Your DTI is in the <strong>caution zone</strong>. Try to reduce existing debts before committing.';
+  else st.innerHTML='Your DTI is <strong>dangerously high</strong>. Seek a lower amount, longer term, or better rate.';
+  buildGRRTimeline();
+}
+
+function buildGRRTimeline(){
+  const el=document.getElementById('grrTimeline');if(!el)return;
+  const mx=GRR[0].v;
+  el.innerHTML=GRR.map((d,i)=>{
+    const pct=Math.round(d.v/mx*100),isLast=i===GRR.length-1;
+    const col=isLast?'var(--green)':d.v>20?'rgba(255,59,48,.55)':d.v>16?'rgba(255,214,10,.55)':'rgba(52,199,89,.55)';
+    return`<div class="rt-col"><div class="rt-val" style="color:${isLast?'var(--green)':'var(--text-3)'};font-weight:${isLast?700:400}">${d.v}</div><div class="rt-bar" style="height:${pct}%;background:${col}"></div><div class="rt-lbl" style="color:${isLast?'var(--green)':'var(--text-3)'};font-weight:${isLast?600:400}">${d.mo}</div></div>`;
+  }).join('');
+}
+
+function buildGRRHistBars(){
+  const el=document.getElementById('grrHistBars');if(!el)return;
+  const mx=GRR[0].v;
+  el.innerHTML=GRR.map((d,i)=>{
+    const pct=Math.round(d.v/mx*100)*0.48,isLast=i===GRR.length-1;
+    const col=isLast?'var(--green)':d.v>20?'rgba(255,59,48,.5)':d.v>16?'rgba(255,214,10,.5)':'rgba(52,199,89,.5)';
+    return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="font-size:7px;color:${isLast?'var(--green)':'var(--text-3)'};font-family:'JetBrains Mono',monospace">${d.v}</div><div style="width:100%;height:${pct}px;min-height:3px;background:${col};border-radius:2px 2px 0 0"></div><div style="font-size:7px;color:${isLast?'var(--green)':'var(--text-3)'}">${d.mo}</div></div>`;
+  }).join('');
+}
+
+function openGRR(){
+  const c=S.currency,res=calc(S.amount,S.rate,S.term,S.income,S.debts);
+  const lrRate=Math.max(S.rate-2,1),alt=calc(S.amount,lrRate,S.term,S.income,S.debts);
+  const longRes=calc(S.amount,S.rate,S.term+12,S.income,S.debts);
+  const topRes=calc(S.amount*1.3,lrRate,S.term,S.income,S.debts);
+  const opts=[
+    {title:'Refinance at a lower rate',saving:fmt(res.interest-alt.interest,c)+' saved',desc:`Refinancing at ${lrRate}% saves ${fmt(res.interest-alt.interest,c)} in interest. Monthly drops from ${fmt(res.m,c)} to ${fmt(alt.m,c)}.`,rec:true,badge:'Recommended'},
+    {title:'Reduce monthly payment',saving:fmt(res.m-alt.m,c)+'/mo',desc:`At ${lrRate}% your monthly drops to ${fmt(alt.m,c)}, freeing up ${fmt(res.m-alt.m,c)} per month for savings.`,rec:false},
+    {title:'Extend term, lower monthly',saving:fmt(res.m-longRes.m,c)+'/mo',desc:`Adding 12 months reduces monthly to ${fmt(longRes.m,c)}. Total interest increases by ${fmt(longRes.interest-res.interest,c)}.`,rec:false},
+    {title:'Top up your loan now',saving:'Act now window',desc:`Access ${fmt(S.amount*0.3,c)} more at ~${lrRate}% while rates are low. New monthly: ${fmt(topRes.m,c)} — better than a separate loan later.`,rec:false,badge:'Act Now'},
+  ];
+  document.getElementById('modalOptions').innerHTML=opts.map(o=>`<div class="modal-opt ${o.rec?'rec':''}"><div class="mo-top"><div class="mo-title">${o.title}</div><div class="mo-saving">${o.saving}</div></div><div class="mo-desc">${o.desc}</div>${o.badge?`<div class="mo-rec-badge">${o.badge}</div>`:''}</div>`).join('');
+  document.getElementById('grrModal').classList.add('open');
+}
+function closeGRROverlay(e){if(e.target.id==='grrModal')closeGRRBtn();}
+function closeGRRBtn(){document.getElementById('grrModal').classList.remove('open');}
+
+function updateSnapshot(){
+  const c=S.currency,res=calc(S.amount,S.rate,S.term,S.income,S.debts),r=rsk(res.score);
+  const rv=document.getElementById('snapRisk');
+  rv.textContent=r.label;rv.className='snap-risk-val '+r.cls;
+  document.getElementById('snapLoan').textContent=fmt(S.amount,c);
+  document.getElementById('snapRate').textContent=S.rate+'%';
+  document.getElementById('snapTotal').textContent=fmt(res.total,c);
+  document.getElementById('snapInterest').textContent=fmt(res.interest,c);
+  document.getElementById('snapMonthly').textContent=fmt(res.m,c);
+  document.getElementById('snapDTI').textContent=Math.round(res.dti)+'%';
+  const recs={safe:'<strong style="color:var(--green)">✓ Safe:</strong> This loan is within manageable limits. Proceed with confidence.',caution:'<strong style="color:var(--yellow)">⚡ Caution:</strong> This loan is at the edge of affordability. Consider negotiating a lower rate first.',danger:'<strong style="color:var(--red)">⚠ High Risk:</strong> This loan exceeds safe affordability thresholds. Consider a lower amount or longer term.'};
+  const key=r.cls==='r-safe'?'safe':r.cls==='r-caution'?'caution':'danger';
+  document.getElementById('snapRec').innerHTML=recs[key];
+  document.getElementById('snapRec').className='snap-rec s-'+key;
+  document.getElementById('snapDate').textContent=new Date().toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+}
+
+function pct(id,min,max){const v=parseFloat(document.getElementById(id).value);return(v-min)/(max-min)*100;}
+function thumb(fid,tid,p){document.getElementById(fid).style.width=p+'%';document.getElementById(tid).style.left=p+'%';}
+
+function syncSliders(){
+  document.getElementById('sLoanSlider').value=S.amount;
+  document.getElementById('sRateSlider').value=S.rate;
+  document.getElementById('sTermSlider').value=S.term;
+  document.getElementById('sIncomeSlider').value=S.income;
+  updateScenario();
+}
+
+function updateScenario(){
+  const amount=parseFloat(document.getElementById('sLoanSlider').value);
+  const rate=parseFloat(document.getElementById('sRateSlider').value);
+  const term=parseFloat(document.getElementById('sTermSlider').value);
+  const income=parseFloat(document.getElementById('sIncomeSlider').value);
+  const c=S.currency;
+  thumb('sLoanFill','sLoanThumb',pct('sLoanSlider',1000,100000));
+  thumb('sRateFill','sRateThumb',pct('sRateSlider',1,45));
+  thumb('sTermFill','sTermThumb',pct('sTermSlider',3,84));
+  thumb('sIncomeFill','sIncomeThumb',pct('sIncomeSlider',500,30000));
+  document.getElementById('sLoanAmt').textContent=fmt(amount,c);
+  document.getElementById('sRate').textContent=rate+'%';
+  document.getElementById('sTerm').textContent=term+' mo';
+  document.getElementById('sIncome').textContent=fmt(income,c);
+  const res=calc(amount,rate,term,income,S.debts),r=rsk(res.score);
+  document.getElementById('sTotalRepay').textContent=fmt(res.total,c);
+  document.getElementById('sMonthly').textContent=fmt(res.m,c);
+  document.getElementById('sDTI').textContent=Math.round(res.dti)+'%';
+  document.getElementById('miniScore').textContent=res.score;
+  document.getElementById('miniScore').style.color=r.color;
+  document.getElementById('miniGauge').setAttribute('stroke-dashoffset',176-(res.score/100)*176);
+  document.getElementById('miniGauge').style.stroke=r.color;
+  const dp=Math.min(res.dti,100),dc=res.dti<36?'linear-gradient(90deg,#34C759,#4ADE80)':res.dti<50?'linear-gradient(90deg,#FFD60A,#FFE55A)':'linear-gradient(90deg,#FF3B30,#FF6B63)';
+  document.getElementById('sDTIFill').style.width=dp+'%';document.getElementById('sDTIFill').style.background=dc;
+  const grrRate=Math.max(rate-2,1),alt=calc(amount,grrRate,term,income,S.debts);
+  document.getElementById('cLoan').textContent=fmt(amount,c);
+  document.getElementById('cRate').textContent=rate+'%';
+  document.getElementById('cTotal').textContent=fmt(res.total,c);
+  document.getElementById('cMonthly').textContent=fmt(res.m,c);
+  document.getElementById('altLoan').textContent=fmt(amount,c);
+  document.getElementById('altRate').textContent=grrRate+'%';
+  document.getElementById('altTotal').textContent=fmt(alt.total,c);
+  document.getElementById('altMonthly').textContent=fmt(alt.m,c);
+  document.getElementById('cSaving').textContent=fmt(res.total-alt.total,c);
+}
+
+function copySnapshot(){
+  const res=calc(S.amount,S.rate,S.term,S.income,S.debts),r=rsk(res.score),c=S.currency;
+  const txt='SIKA LOAN ANALYSIS\n\nLoan Risk: '+r.label+'\nLoan: '+fmt(S.amount,c)+' @ '+S.rate+'% for '+S.term+' months\nMonthly: '+fmt(res.m,c)+'\nTotal: '+fmt(res.total,c)+'\nInterest: '+fmt(res.interest,c)+'\nDTI: '+Math.round(res.dti)+'%\n\nGhana Reference Rate: 11.71% (Mar 2026)\nGenerated by Sika · sika.finance';
+  navigator.clipboard?.writeText(txt).then(()=>{const b=event.currentTarget;b.textContent='✓ Copied!';setTimeout(()=>b.textContent='⬡ Copy Snapshot',2000);});
+}
+function shareWA(){const res=calc(S.amount,S.rate,S.term,S.income,S.debts),r=rsk(res.score),c=S.currency;window.open('https://wa.me/?text='+encodeURIComponent('Sika Loan Analysis\nRisk: '+r.label+'\nTotal: '+fmt(res.total,c)+' | Monthly: '+fmt(res.m,c)+'\nsika.finance'),'_blank');}
+function shareTelegram(){const res=calc(S.amount,S.rate,S.term,S.income,S.debts),r=rsk(res.score),c=S.currency;window.open('https://t.me/share/url?url=https://sika.finance&text='+encodeURIComponent('Sika | Risk: '+r.label+' | Total: '+fmt(res.total,c)),'_blank');}
+
+// init
+buildGRRTimeline();buildGRRHistBars();syncSliders();
+</script>
+</body>
+</html>
